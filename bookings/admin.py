@@ -9,7 +9,8 @@ from .models import Room, Booking, AvailableTime
 
 @admin.register(Room)
 class RoomAdmin(admin.ModelAdmin):
-    list_display = ('name','address')
+    list_display = ('name','slug','address')
+    prepopulated_fields = {'slug': ('name',)}
     ordering = ('name',)
     search_fields = ('name', 'address')
 
