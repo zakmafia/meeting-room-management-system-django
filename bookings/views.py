@@ -65,47 +65,7 @@ def add_available_times(request):
     }
     return render(request, 'bookings/add_available_times.html', context)
 
-# def create_booking(request):
-#     rooms = Room.objects.all()
-#     available_times = AvailableTime.objects.all()
-#     submitted = False
-#     if request.method == "POST":
-#         form = BookingForm(request.POST)
-#         check_email = request.POST.get('booking_person')
-#         # user = Account.objects.get(email__exact=check_email)
-#         # print(user)
-#         if form.is_valid():
-#             # name = form.cleaned_data['name']
-#             # booking_date = form.cleaned_data['booking_date']
-#             # booking_time = form.cleaned_data['booking_time']
-#             # room = form.cleaned_data['room']
-#             # description = form.cleaned_data['description']
-#             # checked_email = form.cleaned_data['booking_person']
-#             # if Account.objects.filter(email=checked_email).exists():
-#             #     user = Account.objects.get(email__exact=checked_email)
-#             #     booking = Booking.objects.create(
-#             #         name = name,
-#             #         booking_date = booking_date,
-#             #         booking_time = booking_time,
-#             #         room = room,
-#             #         description = description,
-#             #         booking_person = user
-#             #     )
-#             # booking.save()
-#             # print(checked_email)
-#             form.save()
-#             return HttpResponseRedirect('/create_booking?submitted=True')
-#     else: 
-#         form = BookingForm
-#         if 'submitted' in request.GET:
-#             submitted = True
-#     context = {
-#         'form': form,
-#         'rooms': rooms,
-#         'available_times': available_times,
-#         'submitted': submitted
-#     }
-#     return render(request, 'bookings/bookings.html', context)
+
 
 def create_booking(request):
     rooms = Room.objects.all()
@@ -157,6 +117,7 @@ def create_booking(request):
     context = {
         'rooms': rooms,
         'available_times': available_times,
+        'current_year': current_year
         
     }
     return render(request, 'bookings/bookings.html', context)
@@ -198,3 +159,44 @@ def view_available_times(request):
 #     }
 #     return render(request, 'home.html', context)
 
+# def create_booking(request):
+#     rooms = Room.objects.all()
+#     available_times = AvailableTime.objects.all()
+#     submitted = False
+#     if request.method == "POST":
+#         form = BookingForm(request.POST)
+#         check_email = request.POST.get('booking_person')
+#         # user = Account.objects.get(email__exact=check_email)
+#         # print(user)
+#         if form.is_valid():
+#             # name = form.cleaned_data['name']
+#             # booking_date = form.cleaned_data['booking_date']
+#             # booking_time = form.cleaned_data['booking_time']
+#             # room = form.cleaned_data['room']
+#             # description = form.cleaned_data['description']
+#             # checked_email = form.cleaned_data['booking_person']
+#             # if Account.objects.filter(email=checked_email).exists():
+#             #     user = Account.objects.get(email__exact=checked_email)
+#             #     booking = Booking.objects.create(
+#             #         name = name,
+#             #         booking_date = booking_date,
+#             #         booking_time = booking_time,
+#             #         room = room,
+#             #         description = description,
+#             #         booking_person = user
+#             #     )
+#             # booking.save()
+#             # print(checked_email)
+#             form.save()
+#             return HttpResponseRedirect('/create_booking?submitted=True')
+#     else: 
+#         form = BookingForm
+#         if 'submitted' in request.GET:
+#             submitted = True
+#     context = {
+#         'form': form,
+#         'rooms': rooms,
+#         'available_times': available_times,
+#         'submitted': submitted
+#     }
+#     return render(request, 'bookings/bookings.html', context)
