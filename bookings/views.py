@@ -78,7 +78,9 @@ def create_booking(request):
 
     name = ""
     booking_date_val = ""
-    room_val = ""
+    room = ""
+    email = ""
+    description = ""
     available_time_list = []
     rooms = Room.objects.all()
     booking_time_am_pm = None
@@ -148,13 +150,14 @@ def create_booking(request):
         try:
             name = request.POST['name']
             room = request.POST['room']
+            email = request.POST['email']
             booking_date = request.POST['date']
+            description = request.POST['description']
             available_times = AvailableTime.objects.all()
             room_instance = Room.objects.get(name__exact = room)
             parsed_date = datetime.strptime(booking_date, "%Y-%d-%m").date()
 
             booking_date_val = booking_date
-            room_val = room 
             
             for available_time in available_times:
                 if not Booking.objects.filter(booking_time=available_time, booking_date=parsed_date, room=room_instance):
@@ -167,7 +170,9 @@ def create_booking(request):
         'current_year': current_year, 
         'booking_date_val': booking_date_val,
         'name': name,
-        'room_val': room_val,
+        'room_val': room,
+        'email_val': email,
+        'description_val': description,
     }
     return render(request, 'bookings/bookings.html', context)
 
