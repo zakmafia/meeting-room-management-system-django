@@ -7,6 +7,13 @@ from django.contrib import messages
 from .models import Booking, Room, AvailableTime
 from accounts.models import Account
 from .forms import BookingForm, RoomForm, AvailableTimeForm
+# For booking message
+from django.contrib.sites.shortcuts import get_current_site
+from django.template.loader import render_to_string
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes
+from django.contrib.auth.tokens import default_token_generator
+from django.core.mail import EmailMessage
 
 # Create your views here.
 now = datetime.now()
@@ -68,57 +75,99 @@ def add_available_times(request):
 
 
 def create_booking(request):
+
+    name = ""
+    booking_date_val = ""
+    room_val = ""
+    available_time_list = []
     rooms = Room.objects.all()
-    available_times = AvailableTime.objects.all()
     booking_time_am_pm = None
 
-    if request.method == 'POST':
-        name = request.POST['name']
-        room = request.POST['room']
-        booking_date = request.POST['date']
-        booking_time = request.POST['time']
-        description = request.POST['description']
-        email = request.POST['email']
-
-        splited_time = booking_time.split(" ")
-        if splited_time[1].startswith("a"):
-            booking_time_am_pm = splited_time[0] + " AM"
-        else:
-            booking_time_am_pm = splited_time[0] + " PM"
-        print(booking_time_am_pm)
-
-    
-
-        parsed_time = datetime.strptime(booking_time_am_pm,"%I:%M %p").time()
-        # # print(parsed_time)
-        parsed_date = datetime.strptime(booking_date, "%Y-%d-%m").date()
-        booking_time_instance = AvailableTime.objects.get(available_time__exact = parsed_time)
-        room_instance = Room.objects.get(name__exact = room)
-        
+    if 'book' in request.POST:
         try:
-            if Account.objects.filter(email=email).exists():
-                user = Account.objects.get(email__exact=email)
-                booking = Booking.objects.create(
-                    name = name,
-                    booking_date = parsed_date,
-                    booking_time = booking_time_instance,
-                    room = room_instance,
-                    description = description,
-                    booking_person = user
-                )
-                booking.save()
-                messages.success(request, 'Your have successfully booked a meeting room')
+            name = request.POST['name'] 
+            room = request.POST['room']
+            booking_date = request.POST['date']
+            booking_time = request.POST['time']
+            description = request.POST['description']
+            email = request.POST['email']
+
+            splited_time = booking_time.split(" ")
+            if splited_time[1].startswith("a"):
+                booking_time_am_pm = splited_time[0] + " AM"
             else:
+                booking_time_am_pm = splited_time[0] + " PM"
+            # print(booking_time_am_pm)
+
+            parsed_date = datetime.strptime(booking_date, "%Y-%d-%m").date()
+            parsed_time = datetime.strptime(booking_time_am_pm,"%I:%M %p").time()
+            # # print(parsed_time)
+            booking_time_instance = AvailableTime.objects.get(available_time__exact = parsed_time)
+            room_instance = Room.objects.get(name__exact = room)
+            
+            try:
+                if Account.objects.filter(email=email).exists():
+                    if not Booking.objects.filter(booking_time=booking_time_instance, booking_date=parsed_date, room=room_instance):
+                        user = Account.objects.get(email__exact=email)
+                        booking = Booking.objects.create(
+                            name = name,
+                            booking_date = parsed_date,
+                            booking_time = booking_time_instance,
+                            room = room_instance,
+                            description = description,
+                            booking_person = user
+                        )
+                        booking.save()
+
+                        # Sending Message when booking
+                        # current_site = get_current_site(request)
+                        # mail_subject = 'You have Booked a Meeting'
+                        # message = render_to_string('bookings/booking_email.html',{
+                        #     'user': user,
+                        #     'domain': current_site,
+                        #     'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+                        #     'token': default_token_generator.make_token(user)
+                        # })
+                        # to_email = email
+                        # send_email = EmailMessage(mail_subject, message, to=[to_email])
+                        # send_email.send()
+                        messages.success(request, 'Your have successfully booked a meeting room')
+                    else:
+                        messages.error(request, 'Select other room or change your reservation time and date!')
+                        return redirect('create_booking')
+                else:
+                    messages.error(request, 'Please fill all the necessary fields!')
+            except(TypeError, ValueError, OverflowError, Account.DoesNotExist):
                 messages.error(request, 'Register to use the booking system')
                 return redirect('register')
-        except(TypeError, ValueError, OverflowError, Account.DoesNotExist):
-            messages.error(request, 'Register to use the booking system')
-            return redirect('register')
+        except:
+            messages.error(request, 'Please fill all the necessary fields!')
+            
+        
+    if 'check_time' in request.POST:
+        try:
+            name = request.POST['name']
+            room = request.POST['room']
+            booking_date = request.POST['date']
+            available_times = AvailableTime.objects.all()
+            room_instance = Room.objects.get(name__exact = room)
+            parsed_date = datetime.strptime(booking_date, "%Y-%d-%m").date()
+
+            booking_date_val = booking_date
+            room_val = room 
+            
+            for available_time in available_times:
+                if not Booking.objects.filter(booking_time=available_time, booking_date=parsed_date, room=room_instance):
+                    available_time_list.append(available_time)
+        except:
+            pass
     context = {
         'rooms': rooms,
-        'available_times': available_times,
-        'current_year': current_year
-        
+        'available_time_list': available_time_list,
+        'current_year': current_year, 
+        'booking_date_val': booking_date_val,
+        'name': name,
+        'room_val': room_val,
     }
     return render(request, 'bookings/bookings.html', context)
 
@@ -144,6 +193,9 @@ def view_available_times(request):
         'current_year': current_year
     }
     return render(request, 'bookings/view_available_times.html', context)
+
+def cancel_booking(request, uidb64, token):
+    return HttpResponse('Cancel Booking')
 
 # def all_bookings(request):
 #     booking_list = Booking.objects.all()

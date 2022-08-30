@@ -22,8 +22,6 @@ class AvailableTime(models.Model):
 class Booking(models.Model):
     name = models.CharField(max_length=120)
     booking_date = models.DateField()
-    # booking_time = models.TimeField()
-    # booking_date = models.DateField()
     booking_time = models.ForeignKey(AvailableTime, on_delete=models.CASCADE)
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
     description = models.TextField(max_length=255, blank=True)
