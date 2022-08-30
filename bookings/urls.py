@@ -10,5 +10,7 @@ urlpatterns = [
     path('view_rooms/', views.view_rooms, name='view_rooms'),
     path('view_available_times/', views.view_available_times, name='view_available_times'),
 
-    path('cancel_booking/', views.cancel_booking, name='cancel_booking'),
+    path('cancel_booking_validate/<uidb64>/<token>/', views.cancel_booking_validate, name='cancel_booking_validate'),
+    path('cancel_booking_view', views.cancel_booking_view, name="cancel_booking_view"),
+    
 ]

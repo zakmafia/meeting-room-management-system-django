@@ -2,7 +2,7 @@
 
 You have successfully booked a meeting room.
 Click the link if you want to cancel your booking
-http://{{ domain }}{% url 'cancel_booking' uidb64=uid token=token %}
+http://{{ domain }}{% url 'cancel_booking_validate' uidb64=uid token=token %}
 If you think it's not you, Please ignore the email.
 
 {% endautoescape %}

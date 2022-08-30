@@ -122,17 +122,17 @@ def create_booking(request):
                         booking.save()
 
                         # Sending Message when booking
-                        # current_site = get_current_site(request)
-                        # mail_subject = 'You have Booked a Meeting'
-                        # message = render_to_string('bookings/booking_email.html',{
-                        #     'user': user,
-                        #     'domain': current_site,
-                        #     'uid': urlsafe_base64_encode(force_bytes(user.pk)),
-                        #     'token': default_token_generator.make_token(user)
-                        # })
-                        # to_email = email
-                        # send_email = EmailMessage(mail_subject, message, to=[to_email])
-                        # send_email.send()
+                        current_site = get_current_site(request)
+                        mail_subject = 'You have Booked a Meeting'
+                        message = render_to_string('bookings/booking_email.html',{
+                            'user': user,
+                            'domain': current_site,
+                            'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+                            'token': default_token_generator.make_token(user)
+                        })
+                        to_email = email
+                        send_email = EmailMessage(mail_subject, message, to=[to_email])
+                        send_email.send()
                         messages.success(request, 'Your have successfully booked a meeting room')
                     else:
                         messages.error(request, 'Select other room or change your reservation time and date!')
@@ -143,8 +143,7 @@ def create_booking(request):
                 messages.error(request, 'Register to use the booking system')
                 return redirect('register')
         except:
-            messages.error(request, 'Please fill all the necessary fields!')
-            
+                messages.error(request, 'Something went wrong! Try again')
         
     if 'check_time' in request.POST:
         try:
@@ -199,8 +198,43 @@ def view_available_times(request):
     }
     return render(request, 'bookings/view_available_times.html', context)
 
-def cancel_booking(request, uidb64, token):
-    return HttpResponse('Cancel Booking')
+def cancel_booking_validate(request, uidb64, token):
+    try:
+        uid = urlsafe_base64_decode(uidb64).decode()
+        user = Account._default_manager.get(pk=uid)
+    except(TypeError, ValueError, OverflowError, Account.DoesNotExist):
+        user = None
+    
+    if user is not None and default_token_generator.check_token(user, token):
+        request.session['uid'] = uid
+        messages.success(request, 'You can cancel your booking!')
+        return redirect('cancel_booking_view')
+    else:
+        messages.error(request, 'This link has been expired!')
+        return redirect('create_booking_view')
+
+def cancel_booking_view(request):
+
+    try:
+        uid = request.session.get('uid')
+        user = Account.objects.get(pk=uid)
+        user_booking = Booking.objects.filter(booking_person=user)
+    except(TypeError, ValueError, OverflowError, Account.DoesNotExist):
+        user = None
+
+    context = {
+        'user_booking': user_booking,
+    }
+    return render(request, 'bookings/cancel_booking_view.html', context) 
+
+
+
+
+
+
+
+
+
 
 # def all_bookings(request):
 #     booking_list = Booking.objects.all()
