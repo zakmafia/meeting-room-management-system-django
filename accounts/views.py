@@ -62,7 +62,7 @@ def login(request):
         user = auth.authenticate(email=email, password=password)
         if user is not None:
             auth.login(request, user)
-            return redirect('home')
+            return redirect('create_booking')
         else:
             messages.error(request, 'Invalid Login Credentials')
             return redirect('login')
