@@ -143,5 +143,5 @@ MESSAGE_TAGS = {
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587 # for gmail
 EMAIL_HOST_USER = 'zekariasmesfin101@gmail.com'
-EMAIL_HOST_PASSWORD = 'kwhnxfczuljckhvp' # remove it as soon as possible...
+EMAIL_HOST_PASSWORD = 'loefdppfwnwojcen' # remove it as soon as possible...
 EMAIL_USE_TLS = True

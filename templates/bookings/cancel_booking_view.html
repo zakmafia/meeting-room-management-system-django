@@ -34,7 +34,7 @@
                         <a href="#" class="title">{{ booking.room.name }}</a>
                         <small>{{ booking.room.address }}</small>
                     </div>
-                    <a href="#" class="btn btn-block btn-danger">Delete Booking </a>
+                    <a href="{% url 'cancel_booking' %}" class="btn btn-block btn-danger">Cancel Booking </a>
                 </figcaption>
             </figure>
         </div> <!-- col.// -->

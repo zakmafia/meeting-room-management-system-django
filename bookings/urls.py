@@ -12,5 +12,6 @@ urlpatterns = [
 
     path('cancel_booking_validate/<uidb64>/<token>/', views.cancel_booking_validate, name='cancel_booking_validate'),
     path('cancel_booking_view', views.cancel_booking_view, name="cancel_booking_view"),
+    path('cancel_booking', views.cancel_booking, name='cancel_booking'),
     
 ]

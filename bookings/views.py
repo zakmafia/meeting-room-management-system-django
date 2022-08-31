@@ -119,8 +119,6 @@ def create_booking(request):
                             description = description,
                             booking_person = user
                         )
-                        booking.save()
-
                         # Sending Message when booking
                         current_site = get_current_site(request)
                         mail_subject = 'You have Booked a Meeting'
@@ -128,11 +126,15 @@ def create_booking(request):
                             'user': user,
                             'domain': current_site,
                             'uid': urlsafe_base64_encode(force_bytes(user.pk)),
-                            'token': default_token_generator.make_token(user)
+                            'token': default_token_generator.make_token(user),
+                            'booking_time': booking_time,
+                            'booking_date': booking_date,
+                            'name': name,
                         })
                         to_email = email
                         send_email = EmailMessage(mail_subject, message, to=[to_email])
-                        send_email.send()
+                        if send_email.send():
+                            booking.save()
                         messages.success(request, 'Your have successfully booked a meeting room')
                     else:
                         messages.error(request, 'Select other room or change your reservation time and date!')
@@ -228,8 +230,8 @@ def cancel_booking_view(request):
     return render(request, 'bookings/cancel_booking_view.html', context) 
 
 
-
-
+def cancel_booking(request):
+    return HttpResponse("You have successefully cancelled your booking!")
 
 
 
