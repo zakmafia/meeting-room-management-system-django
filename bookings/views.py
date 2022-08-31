@@ -19,30 +19,33 @@ from django.core.mail import EmailMessage
 now = datetime.now()
 current_year = now.year
 
-def home(request, year=datetime.now().year, month=datetime.now().strftime('%B')):
-    name = 'Zekarias'
-    month = month.capitalize()
-    month_number = int(list(calendar.month_name).index(month))
-    cal = HTMLCalendar().formatmonth(year, month_number)
-    time = now.strftime('%I:%M %p')
-    context = {
-        'name': name,
-        'year': year,
-        'month': month,
-        'month_number': month_number,
-        'cal':cal,
-        'current_year': current_year,
-        'time': time,
-    }
-    return render(request, 'home.html', context)
+# def home(request, year=datetime.now().year, month=datetime.now().strftime('%B')):
+#     name = 'Zekarias'
+#     month = month.capitalize()
+#     month_number = int(list(calendar.month_name).index(month))
+#     cal = HTMLCalendar().formatmonth(year, month_number)
+#     time = now.strftime('%I:%M %p')
+#     context = {
+#         'name': name,
+#         'year': year,
+#         'month': month,
+#         'month_number': month_number,
+#         'cal':cal,
+#         'current_year': current_year,
+#         'time': time,
+#     }
+#     return render(request, 'home.html', context)
 
 def add_rooms(request):
     submitted = False
     if request.method == "POST":
-        form = RoomForm(request.POST)
+        form = RoomForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
             return HttpResponseRedirect('/add_rooms?submitted=True')
+        else:
+            print(form.errors)
+            return HttpResponseRedirect('/add_rooms?error')
     else: 
         form = RoomForm
         if 'submitted' in request.GET:
@@ -130,6 +133,7 @@ def create_booking(request):
                             'booking_time': booking_time,
                             'booking_date': booking_date,
                             'name': name,
+                            'booking_id': urlsafe_base64_encode(force_bytes(booking.id)),
                         })
                         to_email = email
                         send_email = EmailMessage(mail_subject, message, to=[to_email])
@@ -187,8 +191,14 @@ def view_rooms(request):
     }
     return render(request, 'bookings/view_rooms.html', context)
 
-def room_detail(request):
-    return render(request, 'bookings/room_detail.html')
+def delete_room(request, room_id):
+    try:
+        room = Room.objects.get(id=room_id)
+        room.delete()
+        return redirect('view_rooms')
+    except(TypeError, ValueError, OverflowError, Booking.DoesNotExist):
+        messages.error(request, 'There is an error! Try again!')
+        return redirect('view_rooms')
 
 def view_available_times(request):
     available_times = AvailableTime.objects.all()
@@ -200,15 +210,26 @@ def view_available_times(request):
     }
     return render(request, 'bookings/view_available_times.html', context)
 
-def cancel_booking_validate(request, uidb64, token):
+def delete_time(request, time_id):
+    try:
+        available_time = AvailableTime.objects.get(id=time_id)
+        available_time.delete()
+        return redirect('view_available_times')
+    except(TypeError, ValueError, OverflowError, Booking.DoesNotExist):
+        messages.error(request, 'There is an error! Try again!')
+        return redirect('view_available_times')
+
+def cancel_booking_validate(request, uidb64, token, booking_id):
     try:
         uid = urlsafe_base64_decode(uidb64).decode()
         user = Account._default_manager.get(pk=uid)
+        booking_id_code = urlsafe_base64_decode(booking_id).decode()
     except(TypeError, ValueError, OverflowError, Account.DoesNotExist):
         user = None
     
     if user is not None and default_token_generator.check_token(user, token):
         request.session['uid'] = uid
+        request.session['booking_id'] = booking_id_code
         messages.success(request, 'You can cancel your booking!')
         return redirect('cancel_booking_view')
     else:
@@ -220,7 +241,8 @@ def cancel_booking_view(request):
     try:
         uid = request.session.get('uid')
         user = Account.objects.get(pk=uid)
-        user_booking = Booking.objects.filter(booking_person=user)
+        booking_id = request.session.get('booking_id')
+        user_booking = Booking.objects.filter(booking_person=user, id=booking_id)
     except(TypeError, ValueError, OverflowError, Account.DoesNotExist):
         user = None
 
@@ -230,8 +252,15 @@ def cancel_booking_view(request):
     return render(request, 'bookings/cancel_booking_view.html', context) 
 
 
-def cancel_booking(request):
-    return HttpResponse("You have successefully cancelled your booking!")
+def cancel_booking(request, booking_id):
+    try:
+        booking = Booking.objects.get(id=booking_id)
+        booking.delete()
+        return redirect('cancel_booking_view')
+    except(TypeError, ValueError, OverflowError, Booking.DoesNotExist):
+        return redirect('create_booking')
+
+    
 
 
 

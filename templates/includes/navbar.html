@@ -6,12 +6,13 @@
 	<div class="container">
 <div class="row align-items-center">
 	<div class="col-lg-2 col-md-3 col-6">
-		<a href="{% url 'home' %}" class="brand-wrap">
+		<a href="{% url 'create_booking' %}" class="brand-wrap">
 			<img class="logo" src="{% static './images/HST_LOGO.png' %}">
 		</a> <!-- brand-wrap.// -->
 	</div>
 	<div class="col-lg col-sm col-md col-6 flex-grow-0">
 		<div class="category-wrap dropdown d-inline-block float-right">
+			{% if user.is_superadmin %}
 			<button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown"> 
 				<i class="fa fa-bars"></i> Settings
 			</button>
@@ -19,6 +20,7 @@
 				<a class="dropdown-item" href="{% url 'add_rooms' %}">Add and Edit Rooms </a>
 				<a class="dropdown-item" href="{% url 'add_available_times' %}">Add and Edit Available Times </a>
 			</div>
+			{% endif %}
 		</div>  <!-- category-wrap.// -->
 	</div> <!-- col.// -->
 	<div class="col-lg  col-md-6 col-sm-12 col">
@@ -48,7 +50,6 @@
 					<div class="widget-header">
 						<small class="title text-muted">Welcome {{ user.first_name }}</small>
 						<div> 
-							<a href="#">Dashboard</a> <span class="dark-transp"> | </span>
 							<a href="{% url 'logout' %}"> Logout</a>
 						</div>
 					</div>

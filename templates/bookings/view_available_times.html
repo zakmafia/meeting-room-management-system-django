@@ -55,7 +55,7 @@
                     <div class="fix-height">
                         <a href="#" class="title">{{ time.available_time }}</a>
                     </div>
-                    <a href="#" class="btn btn-block btn-danger">Delete Time </a>
+                    <a href="{% url 'delete_time' time.id %}" class="btn btn-block btn-danger" onclick="return confirm('Are you sure you want to delete this time?')">Delete Time </a>
                 </figcaption>
             </figure>
         </div> <!-- col.// -->

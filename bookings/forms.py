@@ -56,6 +56,7 @@ class BookingForm(ModelForm):
 
 
 class RoomForm(ModelForm):
+    images = forms.ImageField()
     class Meta:
         model = Room
         fields = ['name', 'address', 'images']
